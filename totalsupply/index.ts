@@ -46,10 +46,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const web3 = new Web3(new Web3.providers.HttpProvider(config.providers.web3));
         const contract = new web3.eth.Contract(JSON.parse(abiJson), tokenConfig.contractAddress);
 
-        // Call the contract to find total supply. This number will be returned without token decimals.
+        // Call the contract to find total supply. This number will be returned without token decimals (the totalSupply is in ERC-20 standard)
         const totalSupply = await contract.methods.totalSupply().call();
 
-        // Divide total supply by number of decimals in the token (this is ERC-20 standard)
+        // totalSupply needs to be formatted to appropriate decimal places (it's a huge number, and needs to be divided by 10 ^ decimal places)
         const actualSupply = new BN(totalSupply).div(new BN(10).pow(new BN(tokenConfig.decimals))).toString(10);
 
         context.res = {
