@@ -2,8 +2,8 @@ A quick way to fetch total supply for your smart contract token via web3 and out
 
 # Installation
 
-- Get Azure account
-- Get Azure Functions extension for Visual Studio Code
+- Get Microsoft Azure account
+- Get Visual Studio Code & install Azure Functions extension 
 - You will need web3 provider (ex: infura.io) and set it as a "web3" prop in `local.settings.json` Values section (This is Application Settings in prod)
 
 # Usage
