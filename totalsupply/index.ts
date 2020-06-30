@@ -13,6 +13,10 @@ const config = {
             contractAddress: '0xF80D589b3Dbe130c270a69F1a69D050f268786Df', // Datamine ERC-777 Token
             decimals: 18
         },
+        flux: {
+            contractAddress: '0x469eDA64aEd3A3Ad6f868c44564291aA415cB1d9', // FLUX ERC-777 Token
+            decimals: 18
+        },
         // You can list multiple tokens here
     }
 }
@@ -96,7 +100,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 const getTokenConfig = (token: string) => {
     switch (token) {
         case 'dam':
-            return config.tokens.dam;
+        case 'flux':
+            return config.tokens[token];
     }
 }
 

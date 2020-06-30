@@ -1,4 +1,4 @@
-A quick way to fetch total supply for your Ethereum based ERC-20 smart contract token via web3 and output it to body. This example comes with Datamine (DAM) ERC-777 token example.
+A quick way to fetch total supply for your Ethereum based ERC-20 smart contract token via web3 and output it to body. This example comes with Datamine (DAM) & FLUX ERC-777 tokens pre-configured.
 
 # Installation
 
