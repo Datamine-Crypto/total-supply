@@ -47,6 +47,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     // You can pass token name in through the 
     const token = (req.query.token || (req.body && req.body.token));
     const displayMethod = (req.query.displayMethod || (req.body && req.body.displayMethod));
+    const supplyType = (req.query.supplyType || (req.body && req.body.supplyType));
 
     const tokenConfig = getTokenConfig(token)
     if (!tokenConfig) {
@@ -66,22 +67,37 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const web3 = new Web3(new Web3.providers.HttpProvider(config.providers.web3));
         const contract = new web3.eth.Contract(JSON.parse(abiJson), tokenConfig.contractAddress);
 
-        // Call the contract to find total supply. This number will be returned without token decimals (the totalSupply is in ERC-20 standard)
-        const totalSupply = await contract.methods.totalSupply().call();
+        const getTotalSupply = async ()=>{ 
+
+            // Call the contract to find total supply. This number will be returned without token decimals (the totalSupply is in ERC-20 standard)
+            const totalSupply = await contract.methods.totalSupply().call();
+            const bnTotalSupply = new BN(totalSupply);
+
+            // Here we can see how we can calculate circulating supply for DAM (subtract locked-in DAM from FLUX smart-contract)
+            if (supplyType === 'circulating' && token === 'dam') {
+                const circulatingAmount = await contract.methods.balanceOf(config.tokens.flux.contractAddress).call();
+                return bnTotalSupply.sub(new BN(circulatingAmount));
+            }
+
+            return bnTotalSupply;
+        }
+
+        const totalSupply = await getTotalSupply()
+        
 
         const getBody = ()=>{
             if (!!displayMethod) {
                 switch (displayMethod) {
                     // For a nubmer that includes decimals
                     case 'full':
-                        return BNToDecimal(new BN(totalSupply), false);
+                        return BNToDecimal(totalSupply, false);
                     // No division
                     case 'pure':
-                        return new BN(totalSupply).toString(10);
+                        return totalSupply.toString(10);
                 }
             }
             // totalSupply needs to be formatted to appropriate decimal places (it's a huge number, and needs to be divided by 10 ^ decimal places)
-            return new BN(totalSupply).div(new BN(10).pow(new BN(tokenConfig.decimals))).toString(10);
+            return totalSupply.div(new BN(10).pow(new BN(tokenConfig.decimals))).toString(10);
         }
 
         const body = getBody()
